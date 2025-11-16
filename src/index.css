@@ -1,6 +1,10 @@
 @import 'tailwindcss';
 @import "tw-animate-css";
 
+@theme {
+  --color-border: var(--border);
+}
+
 @layer base {
   * {
     @apply border-border;
