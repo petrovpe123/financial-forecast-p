@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -11,7 +12,22 @@ interface AIReportPanelProps {
   isLoading: boolean;
 }
 
-export function AIReportPanel({ insights, isLoading }: AIReportPanelProps) {
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, x: 20 },
+  show: { opacity: 1, x: 0 }
+};
+
+export const AIReportPanel = memo(function AIReportPanel({ insights, isLoading }: AIReportPanelProps) {
   if (isLoading) {
     return (
       <Card className="p-6">
@@ -31,21 +47,6 @@ export function AIReportPanel({ insights, isLoading }: AIReportPanelProps) {
   if (!insights) {
     return null;
   }
-
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const item = {
-    hidden: { opacity: 0, x: 20 },
-    show: { opacity: 1, x: 0 }
-  };
 
   return (
     <motion.div
@@ -155,4 +156,4 @@ export function AIReportPanel({ insights, isLoading }: AIReportPanelProps) {
       </Card>
     </motion.div>
   );
-}
+});

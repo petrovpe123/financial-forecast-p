@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { TrendUp, TrendDown } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
@@ -12,7 +12,7 @@ interface MetricCardProps {
   delay?: number;
 }
 
-export function MetricCard({ label, value, format = 'currency', trend, icon, delay = 0 }: MetricCardProps) {
+export const MetricCard = memo(function MetricCard({ label, value, format = 'currency', trend, icon, delay = 0 }: MetricCardProps) {
   const [displayValue, setDisplayValue] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -41,7 +41,7 @@ export function MetricCard({ label, value, format = 'currency', trend, icon, del
     return () => clearTimeout(timer);
   }, [value, delay]);
 
-  const formatValue = (val: number) => {
+  const formatValue = useCallback((val: number) => {
     switch (format) {
       case 'currency':
         return `$${Math.round(val).toLocaleString()}`;
@@ -52,7 +52,7 @@ export function MetricCard({ label, value, format = 'currency', trend, icon, del
       default:
         return val.toLocaleString();
     }
-  };
+  }, [format]);
 
   return (
     <Card className={cn(
@@ -87,4 +87,4 @@ export function MetricCard({ label, value, format = 'currency', trend, icon, del
       </div>
     </Card>
   );
-}
+});
