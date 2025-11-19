@@ -6,6 +6,7 @@ import { FinancialChart } from '@/components/FinancialChart';
 import { CategoryChart } from '@/components/CategoryChart';
 import { AIReportPanel } from '@/components/AIReportPanel';
 import { DataTable } from '@/components/DataTable';
+import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -127,16 +128,19 @@ function App() {
             <h1 className="text-4xl font-bold tracking-tight">
               Financial Forecasting & Budget Automation
             </h1>
-            {records.length > 0 && (
-              <Button 
-                onClick={handleRefresh} 
-                disabled={isAnalyzing}
-                variant="outline"
-              >
-                <ArrowsClockwise className={isAnalyzing ? 'animate-spin' : ''} />
-                Refresh Analysis
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {records.length > 0 && (
+                <Button 
+                  onClick={handleRefresh} 
+                  disabled={isAnalyzing}
+                  variant="outline"
+                >
+                  <ArrowsClockwise className={isAnalyzing ? 'animate-spin' : ''} />
+                  Refresh Analysis
+                </Button>
+              )}
+              <ThemeSwitcher />
+            </div>
           </div>
           <p className="text-muted-foreground">
             Transform financial data into actionable insights with AI-powered analysis and forecasting
