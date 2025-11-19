@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { ForecastData } from '@/lib/types';
@@ -8,15 +9,15 @@ interface FinancialChartProps {
   dataKey: 'revenue' | 'expenses' | 'cash_flow';
 }
 
-export function FinancialChart({ data, title, dataKey }: FinancialChartProps) {
-  const chartData = data.map(item => ({
+export const FinancialChart = memo(function FinancialChart({ data, title, dataKey }: FinancialChartProps) {
+  const chartData = useMemo(() => data.map(item => ({
     date: new Date(item.timestamp).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
     value: item[dataKey],
     forecast: item.type === 'forecast' ? item[dataKey] : null,
     historical: item.type === 'historical' ? item[dataKey] : null,
-  }));
+  })), [data, dataKey]);
 
-  const getColor = () => {
+  const color = useMemo(() => {
     switch (dataKey) {
       case 'revenue':
         return 'oklch(0.55 0.12 180)';
@@ -27,7 +28,7 @@ export function FinancialChart({ data, title, dataKey }: FinancialChartProps) {
       default:
         return 'oklch(0.45 0.15 240)';
     }
-  };
+  }, [dataKey]);
 
   const forecastColor = 'oklch(0.70 0.15 75)';
 
@@ -38,8 +39,8 @@ export function FinancialChart({ data, title, dataKey }: FinancialChartProps) {
         <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id={`color-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={getColor()} stopOpacity={0.3}/>
-              <stop offset="95%" stopColor={getColor()} stopOpacity={0}/>
+              <stop offset="5%" stopColor={color} stopOpacity={0.3}/>
+              <stop offset="95%" stopColor={color} stopOpacity={0}/>
             </linearGradient>
             <linearGradient id={`color-forecast-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor={forecastColor} stopOpacity={0.2}/>
@@ -74,11 +75,12 @@ export function FinancialChart({ data, title, dataKey }: FinancialChartProps) {
           <Area
             type="monotone"
             dataKey="historical"
-            stroke={getColor()}
+            stroke={color}
             strokeWidth={3}
             fill={`url(#color-${dataKey})`}
             name="Historical"
-            dot={{ fill: getColor(), r: 4 }}
+            dot={{ fill: color, r: 4 }}
+            isAnimationActive={false}
           />
           <Area
             type="monotone"
@@ -89,9 +91,10 @@ export function FinancialChart({ data, title, dataKey }: FinancialChartProps) {
             fill={`url(#color-forecast-${dataKey})`}
             name="Forecast"
             dot={{ fill: forecastColor, r: 4 }}
+            isAnimationActive={false}
           />
         </AreaChart>
       </ResponsiveContainer>
     </Card>
   );
-}
+});
