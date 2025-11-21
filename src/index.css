@@ -44,7 +44,7 @@
   --spacing: 0.3rem;
 }
 
-.dark{
+.dark {
   --background: oklch(0.15 0.01 240);
   --foreground: oklch(0.98 0.002 240);
   --card: oklch(0.18 0.01 240);
