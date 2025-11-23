@@ -1,0 +1,37 @@
+import { Moon, Sun } from '@phosphor-icons/react';
+import { useTheme } from 'next-themes';
+import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
+
+export function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // useEffect only runs on the client, so now we can safely show the UI
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <Button variant="outline" size="icon">
+        <Sun size={20} />
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size="icon"
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      aria-label="Toggle theme"
+    >
+      {theme === 'dark' ? (
+        <Sun size={20} weight="duotone" />
+      ) : (
+        <Moon size={20} weight="duotone" />
+      )}
+    </Button>
+  );
+}
