@@ -1,6 +1,8 @@
 import { Card } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { ForecastData } from '@/lib/types';
+import { downsampleLTTB, shouldDownsample } from '@/lib/dataSampling';
+import { useMemo } from 'react';
 
 interface FinancialChartProps {
   data: ForecastData[];
@@ -9,12 +11,52 @@ interface FinancialChartProps {
 }
 
 export function FinancialChart({ data, title, dataKey }: FinancialChartProps) {
-  const chartData = data.map(item => ({
-    date: new Date(item.timestamp).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-    value: item[dataKey],
-    forecast: item.type === 'forecast' ? item[dataKey] : null,
-    historical: item.type === 'historical' ? item[dataKey] : null,
-  }));
+  const chartData = useMemo(() => {
+    // Transform data to chart format
+    const transformedData = data.map((item, index) => ({
+      date: new Date(item.timestamp).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      value: item[dataKey],
+      forecast: item.type === 'forecast' ? item[dataKey] : null,
+      historical: item.type === 'historical' ? item[dataKey] : null,
+      originalIndex: index,
+      timestamp: item.timestamp,
+    }));
+
+    // Apply downsampling if data is too large
+    // Separate historical and forecast data for better sampling
+    const historicalData = transformedData.filter(item => item.historical !== null);
+    const forecastData = transformedData.filter(item => item.forecast !== null);
+
+    let sampledHistorical = historicalData;
+    let sampledForecast = forecastData;
+
+    // Sample historical data if needed (threshold: 300 points)
+    if (shouldDownsample(historicalData.length, 300)) {
+      sampledHistorical = downsampleLTTB(
+        historicalData,
+        300,
+        (item, index) => index,
+        (item) => item.historical || 0
+      );
+    }
+
+    // Forecast data is typically small, but sample if needed
+    if (shouldDownsample(forecastData.length, 100)) {
+      sampledForecast = downsampleLTTB(
+        forecastData,
+        100,
+        (item, index) => index,
+        (item) => item.forecast || 0
+      );
+    }
+
+    // Merge sampled data back together, maintaining chronological order
+    const mergedData = [...sampledHistorical, ...sampledForecast].sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
+
+    return mergedData;
+  }, [data, dataKey]);
 
   const getColor = () => {
     switch (dataKey) {

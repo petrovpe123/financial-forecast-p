@@ -1,17 +1,45 @@
 import { Card } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { CategoryBreakdown } from '@/lib/types';
+import { useMemo } from 'react';
 
 interface CategoryChartProps {
   data: CategoryBreakdown[];
 }
 
 export function CategoryChart({ data }: CategoryChartProps) {
-  const chartData = data.map(item => ({
-    category: item.category,
-    revenue: item.revenue,
-    expenses: item.expenses,
-  }));
+  const chartData = useMemo(() => {
+    const transformedData = data.map(item => ({
+      category: item.category,
+      revenue: item.revenue,
+      expenses: item.expenses,
+    }));
+
+    // If we have too many categories, show only top N by total value
+    const maxCategories = 20;
+    if (transformedData.length > maxCategories) {
+      // Sort by total value (revenue + expenses) descending
+      const sortedData = transformedData
+        .sort((a, b) => (b.revenue + b.expenses) - (a.revenue + a.expenses))
+        .slice(0, maxCategories);
+      
+      // Calculate "Others" category from remaining items
+      const othersData = transformedData.slice(maxCategories);
+      if (othersData.length > 0) {
+        const othersRevenue = othersData.reduce((sum, item) => sum + item.revenue, 0);
+        const othersExpenses = othersData.reduce((sum, item) => sum + item.expenses, 0);
+        sortedData.push({
+          category: `Others (${othersData.length})`,
+          revenue: othersRevenue,
+          expenses: othersExpenses,
+        });
+      }
+      
+      return sortedData;
+    }
+
+    return transformedData;
+  }, [data]);
 
   return (
     <Card className="p-6">
