@@ -1,6 +1,8 @@
 import { Card } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { ForecastData } from '@/lib/types';
+import { sampleChartData } from '@/lib/dataSampling';
+import { useMemo } from 'react';
 
 interface FinancialChartProps {
   data: ForecastData[];
@@ -8,13 +10,21 @@ interface FinancialChartProps {
   dataKey: 'revenue' | 'expenses' | 'cash_flow';
 }
 
+// Performance threshold: sample data if more than 100 points
+const MAX_CHART_POINTS = 100;
+
 export function FinancialChart({ data, title, dataKey }: FinancialChartProps) {
-  const chartData = data.map(item => ({
-    date: new Date(item.timestamp).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-    value: item[dataKey],
-    forecast: item.type === 'forecast' ? item[dataKey] : null,
-    historical: item.type === 'historical' ? item[dataKey] : null,
-  }));
+  const chartData = useMemo(() => {
+    const transformedData = data.map(item => ({
+      date: new Date(item.timestamp).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      value: item[dataKey],
+      forecast: item.type === 'forecast' ? item[dataKey] : null,
+      historical: item.type === 'historical' ? item[dataKey] : null,
+    }));
+
+    // Apply data sampling for performance with large datasets
+    return sampleChartData(transformedData, MAX_CHART_POINTS);
+  }, [data, dataKey]);
 
   const getColor = () => {
     switch (dataKey) {
