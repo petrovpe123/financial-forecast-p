@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sampleChartData, sampleWithExtremes, aggregateData } from '../lib/dataSampling';
+import { sampleChartData, sampleWithExtremes, aggregateData } from '@/lib/dataSampling';
 
 describe('Data Sampling Utilities', () => {
   describe('sampleChartData', () => {
@@ -42,6 +42,13 @@ describe('Data Sampling Utilities', () => {
       const result = sampleChartData(data, 10);
       
       expect(result).toHaveLength(0);
+    });
+
+    it('should throw error when maxPoints is less than 2', () => {
+      const data = [{ value: 1 }, { value: 2 }, { value: 3 }];
+      
+      expect(() => sampleChartData(data, 1)).toThrow('maxPoints must be at least 2');
+      expect(() => sampleChartData(data, 0)).toThrow('maxPoints must be at least 2');
     });
   });
 
@@ -92,6 +99,19 @@ describe('Data Sampling Utilities', () => {
       const values = result.map(item => item.value);
       expect(values).toContain(100); // First/Max
       expect(values).toContain(5);   // Last/Min
+    });
+
+    it('should handle empty array gracefully', () => {
+      const data: Array<{ value: number; id: number }> = [];
+      const result = sampleWithExtremes(data, 5, 'value');
+      
+      expect(result).toHaveLength(0);
+    });
+
+    it('should throw error when maxPoints is less than 2 for non-empty data', () => {
+      const data = [{ value: 1 }, { value: 2 }, { value: 3 }];
+      
+      expect(() => sampleWithExtremes(data, 1, 'value')).toThrow('maxPoints must be at least 2');
     });
   });
 

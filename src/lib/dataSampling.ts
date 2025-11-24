@@ -5,10 +5,10 @@
 
 /**
  * Sample data points intelligently to reduce chart rendering overhead
- * Preserves first, last, min, and max points, then samples evenly from remaining points
+ * Preserves first and last points, then samples evenly from remaining points
  * 
  * @param data Array of data items to sample
- * @param maxPoints Maximum number of points to return
+ * @param maxPoints Maximum number of points to return (must be at least 2)
  * @returns Sampled array maintaining visual fidelity
  */
 export function sampleChartData<T extends Record<string, any>>(
@@ -18,6 +18,11 @@ export function sampleChartData<T extends Record<string, any>>(
   // If data is already within limits, return as-is
   if (data.length <= maxPoints) {
     return data;
+  }
+
+  // Validate maxPoints is sufficient
+  if (maxPoints < 2) {
+    throw new Error('maxPoints must be at least 2 to preserve first and last points');
   }
 
   // Always preserve first and last points
@@ -44,7 +49,7 @@ export function sampleChartData<T extends Record<string, any>>(
  * Preserves extreme values (min/max) for a given key to maintain chart accuracy
  * 
  * @param data Array of data items to sample
- * @param maxPoints Maximum number of points to return
+ * @param maxPoints Maximum number of points to return (must be at least 2)
  * @param valueKey Key to use for finding min/max values
  * @returns Sampled array preserving extreme values
  */
@@ -55,6 +60,15 @@ export function sampleWithExtremes<T extends Record<string, any>>(
 ): T[] {
   if (data.length <= maxPoints) {
     return data;
+  }
+
+  // Validate inputs
+  if (data.length === 0) {
+    return [];
+  }
+
+  if (maxPoints < 2) {
+    throw new Error('maxPoints must be at least 2 to preserve first and last points');
   }
 
   // Find indices of min and max values
@@ -81,12 +95,17 @@ export function sampleWithExtremes<T extends Record<string, any>>(
   // Calculate how many more points we need
   const pointsNeeded = maxPoints - preserveIndices.size;
   
+  // Only add more points if we haven't exceeded maxPoints
   if (pointsNeeded > 0) {
     const step = data.length / (pointsNeeded + 1);
     for (let i = 1; i <= pointsNeeded; i++) {
       const index = Math.round(step * i);
       if (index > 0 && index < data.length - 1) {
         preserveIndices.add(index);
+        // Stop if we've reached maxPoints
+        if (preserveIndices.size >= maxPoints) {
+          break;
+        }
       }
     }
   }
