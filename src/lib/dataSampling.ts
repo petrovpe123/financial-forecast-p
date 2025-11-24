@@ -58,13 +58,13 @@ export function sampleWithExtremes<T extends Record<string, any>>(
   maxPoints: number,
   valueKey: keyof T
 ): T[] {
-  if (data.length <= maxPoints) {
-    return data;
-  }
-
-  // Validate inputs
+  // Validate inputs - check empty array first
   if (data.length === 0) {
     return [];
+  }
+
+  if (data.length <= maxPoints) {
+    return data;
   }
 
   if (maxPoints < 2) {
