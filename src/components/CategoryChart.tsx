@@ -1,32 +1,17 @@
 import { Card } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { CategoryBreakdown } from '@/lib/types';
-import { useMemo } from 'react';
 
 interface CategoryChartProps {
   data: CategoryBreakdown[];
 }
 
-// Performance threshold: limit categories displayed in bar chart
-const MAX_CATEGORIES = 20;
-
 export function CategoryChart({ data }: CategoryChartProps) {
-  const chartData = useMemo(() => {
-    const transformedData = data.map(item => ({
-      category: item.category,
-      revenue: item.revenue,
-      expenses: item.expenses,
-    }));
-
-    // Sort by total value (revenue + expenses) and take top categories for performance
-    if (transformedData.length > MAX_CATEGORIES) {
-      return transformedData
-        .sort((a, b) => (b.revenue + b.expenses) - (a.revenue + a.expenses))
-        .slice(0, MAX_CATEGORIES);
-    }
-
-    return transformedData;
-  }, [data]);
+  const chartData = data.map(item => ({
+    category: item.category,
+    revenue: item.revenue,
+    expenses: item.expenses,
+  }));
 
   return (
     <Card className="p-6">
