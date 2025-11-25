@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Toaster, toast } from 'sonner';
 import { FileUpload } from '@/components/FileUpload';
 import { MetricCard } from '@/components/MetricCard';
@@ -28,7 +28,7 @@ function App() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [forecastAccuracy, setForecastAccuracy] = useState<number>(0);
 
-  const handleFileUpload = async (content: string) => {
+  const handleFileUpload = useCallback(async (content: string) => {
     setIsProcessing(true);
     setErrors([]);
     
@@ -85,9 +85,9 @@ function App() {
       setIsProcessing(false);
       setIsAnalyzing(false);
     }
-  };
+  }, []);
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     if (records.length === 0) return;
 
     setIsAnalyzing(true);
@@ -115,7 +115,9 @@ function App() {
     } finally {
       setIsAnalyzing(false);
     }
-  };
+  }, [records]);
+
+  const hasData = useMemo(() => records.length > 0, [records.length]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -127,7 +129,7 @@ function App() {
             <h1 className="text-4xl font-bold tracking-tight">
               Financial Forecasting & Budget Automation
             </h1>
-            {records.length > 0 && (
+            {hasData && (
               <Button 
                 onClick={handleRefresh} 
                 disabled={isAnalyzing}
@@ -254,7 +256,7 @@ function App() {
             </>
           )}
 
-          {records.length === 0 && !isProcessing && (
+          {!hasData && !isProcessing && (
             <div className="text-center py-12">
               <ChartLine size={64} weight="duotone" className="mx-auto text-muted-foreground mb-4" />
               <h3 className="text-xl font-semibold mb-2">No Data Yet</h3>

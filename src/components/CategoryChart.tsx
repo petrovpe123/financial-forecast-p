@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { CategoryBreakdown } from '@/lib/types';
@@ -6,12 +7,12 @@ interface CategoryChartProps {
   data: CategoryBreakdown[];
 }
 
-export function CategoryChart({ data }: CategoryChartProps) {
-  const chartData = data.map(item => ({
+export const CategoryChart = memo(function CategoryChart({ data }: CategoryChartProps) {
+  const chartData = useMemo(() => data.map(item => ({
     category: item.category,
     revenue: item.revenue,
     expenses: item.expenses,
-  }));
+  })), [data]);
 
   return (
     <Card className="p-6">
@@ -48,15 +49,17 @@ export function CategoryChart({ data }: CategoryChartProps) {
             fill="oklch(0.55 0.12 180)" 
             radius={[8, 8, 0, 0]}
             name="Revenue"
+            isAnimationActive={false}
           />
           <Bar 
             dataKey="expenses" 
             fill="oklch(0.35 0.02 240)" 
             radius={[8, 8, 0, 0]}
             name="Expenses"
+            isAnimationActive={false}
           />
         </BarChart>
       </ResponsiveContainer>
     </Card>
   );
-}
+});
